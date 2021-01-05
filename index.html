@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    
+    <script>
+        var from = null, start = 0, url='http://192.168.1.18:1234/chat.php';
+
+        $(document).ready(function(){
+            from = prompt("Ingresa tu Nombre de Usuario")
+            load();
+            $('form').submit(function(e){
+                $.post(url, {
+                message: $('#mensaje').val(),
+                from: from
+            });
+            $('#mensaje').val('');
+                return false;
+            })
+        });
+
+        function load(){
+            $.get(url + '?start=' + start, function(result){
+                if(result.items){
+                    result.items.forEach(item =>{
+                        start = item.id;
+                        $('#mensajes').append(renderMessage(item));
+                    });
+                    $('#mensajes').animate({scrollTop: $('#mensajes')[0].scrollHeight});
+                };
+                load();
+
+            });
+        }
+
+        function renderMessage(item){
+            let time = new Date(item.fecha);
+            time = `${time.getHours()}:${time.getMinutes() < 10 ? '0' : ''}${time.getMinutes()}`;
+            return `<div class="mensaje"<p>${item.autor}</p>${item.mensaje}<span>${time}</span></div>`
+        }
+    </script>
+    <title>Chat en Vivo</title>
+
+
+    <style>
+        body{
+            margin:0;
+            overflow: hidden;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        #mensajes{
+            height: 88vh;
+            overflow-x: hidden;
+            padding: 10px;
+            background-image: url(bg.jpg);
+        }
+        form{
+            display:flex;
+        }
+        input{
+            font-size: 1.2rem;
+            padding: 10px;
+            margin: 10px 5px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #mensaje{
+            flex:2;
+        }
+        .mensaje{
+            background-color: #96f18a;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+        .mensaje p{
+            margin: 0;
+            font-weight: bold;
+        }
+        .mensaje span{
+            font-size: 0.7rem;
+            margin-left: 15px;
+        }
+    </style>
+
+</head>
+<body>
+    
+    <div id="mensajes"></div>
+    <form>
+        <input type="text" id="mensaje" autocomplete="off" autofocus placeholder="Escribe aca...">
+        <input type="submit" value="Enviar">
+
+    </form>
+
+</body>
+</html>
